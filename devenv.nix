@@ -5,9 +5,10 @@
   packages = with pkgs; [
     figlet
     lolcat
-    # rustls is a pure rust option instead of the below
-    # openssl
-    # pkg-config
+    # Required for cargo-tarpaulin
+    openssl
+    pkg-config
+    # rustls is a pure rust option to explore instead of the above
   ];
 
   env = {
@@ -30,30 +31,22 @@
     ];
   };
 
-  tasks = {
-    "rust:cargo-setup" = {
-      exec = ''
-        for tool in cargo-watch cargo-expand cargo-nextest cargo-tarpaulin cargo-audit cargo-insta; do
-          command -v "$tool" >/dev/null || echo "⚠️  $tool not found — run: cargo install --locked $tool"
-        done
-      '';
-      after = [ "devenv:enterShell" ];
-    };
-  };
-
   # https://devenv.sh/scripts/
   scripts = {
-    info.exec = ''
+    init.exec = ''
       figlet Rust dev | lolcat
       echo ""
       echo "🦀 Toolchain:"
       rustc --version
       cargo --version
+      for tool in cargo-watch cargo-expand cargo-nextest cargo-tarpaulin cargo-audit cargo-insta; do
+        command -v "$tool" >/dev/null || echo "⚠️  $tool not found — run: cargo install --locked $tool"
+      done
     '';
   };
 
   # https://devenv.sh/basics/
   enterShell = ''
-    info
+    init
   '';
 }
