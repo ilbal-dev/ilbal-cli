@@ -1,46 +1,59 @@
-{ pkgs, lib, config, inputs, ... }:
+{ pkgs, ... }:
 
 {
-  # https://devenv.sh/basics/
-  env.GREET = "devenv";
-
   # https://devenv.sh/packages/
-  packages = [ pkgs.git ];
+  packages = with pkgs; [
+    figlet
+    lolcat
+    # rustls is a pure rust option instead of the below
+    # openssl
+    # pkg-config
+  ];
+
+  env = {
+    RUST_BACKTRACE = "1";
+    CARGO_TERM_COLOR = "always";
+  };
 
   # https://devenv.sh/languages/
-  # languages.rust.enable = true;
+  languages.rust = {
+    enable = true;
+    channel = "stable";
+    components = [
+      "rustc"
+      "cargo"
+      "clippy"
+      "rustfmt"
+      "rust-analyzer"
+      "rust-src"
+      "llvm-tools"
+    ];
+  };
 
-  # https://devenv.sh/processes/
-  # processes.dev.exec = "${lib.getExe pkgs.watchexec} -n -- ls -la";
-
-  # https://devenv.sh/services/
-  # services.postgres.enable = true;
+  tasks = {
+    "rust:cargo-setup" = {
+      exec = ''
+        for tool in cargo-watch cargo-expand cargo-nextest cargo-tarpaulin cargo-audit cargo-insta; do
+          command -v "$tool" >/dev/null || echo "⚠️  $tool not found — run: cargo install --locked $tool"
+        done
+      '';
+      after = [ "devenv:enterShell" ];
+    };
+  };
 
   # https://devenv.sh/scripts/
-  scripts.hello.exec = ''
-    echo hello from $GREET
-  '';
+  scripts = {
+    info.exec = ''
+      figlet Rust dev | lolcat
+      echo ""
+      echo "🦀 Toolchain:"
+      rustc --version
+      cargo --version
+    '';
+  };
 
   # https://devenv.sh/basics/
   enterShell = ''
-    hello         # Run scripts directly
-    git --version # Use packages
+    info
   '';
-
-  # https://devenv.sh/tasks/
-  # tasks = {
-  #   "myproj:setup".exec = "mytool build";
-  #   "devenv:enterShell".after = [ "myproj:setup" ];
-  # };
-
-  # https://devenv.sh/tests/
-  enterTest = ''
-    echo "Running tests"
-    git --version | grep --color=auto "${pkgs.git.version}"
-  '';
-
-  # https://devenv.sh/git-hooks/
-  # git-hooks.hooks.shellcheck.enable = true;
-
-  # See full reference at https://devenv.sh/reference/options/
 }
