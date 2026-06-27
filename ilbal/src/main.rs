@@ -1,36 +1,27 @@
-use clap::{Arg, ArgMatches, Command, command};
+use clap::{Command, command};
+use dialoguer::{Confirm, Input, InputValidator, MultiSelect, Password, PasswordValidator, Select};
 use indoc::indoc;
+use owo_colors::OwoColorize;
 
 fn main() {
     // ***** Collect command line arguments *****
-    let match_result: ArgMatches = command!()
+    let match_result = command!()
         .about(indoc!(
             "The ilbal CLI provides collaborative database-centric development workflows
             for fast iteration. Tools include database branching, data ingress, and more."
         ))
-        .subcommand(
-            Command::new("init")
-                .about("Initialize an ilbal project (default: .)")
-                .arg(
-                    Arg::new("directory")
-                        .long("dir")
-                        .short('d')
-                        .help("Path of ilbal project (default: .)"),
-                )
-        )
+        .subcommand_required(true)
+        .subcommand(Command::new("init").about("Initialize an ilbal project (default: .)"))
         .subcommand(Command::new("start").about("Start the ilbal database"))
         .subcommand(Command::new("stop").about("Stop the ilbal database"))
         .subcommand(Command::new("status").about("Get the status of the ilbal project"))
-        .subcommand(
-            Command::new("pgbranch")
-                .about("Git-like actions on local ilbal database")
-                .arg(Arg::new("name").required(true).help("Branch name")),
-        )
+        .subcommand(Command::new("pgbranch").about("Git-like actions on local ilbal database"))
         .subcommand(Command::new("pgroll").about("Push database changes"))
         .subcommand(Command::new("pull").about("Pull database from ilbal cloud"))
         .subcommand(
             Command::new("load")
                 .about("Access data loaders")
+                .subcommand_required(true)
                 .subcommand(
                     Command::new("dbcrossbar")
                         .about("Translate between database and storage formats (including CSV). (https://www.dbcrossbar.org)"),
@@ -38,6 +29,7 @@ fn main() {
                 .subcommand(
                     Command::new("gdal")
                         .about("Translate between geospatial raster and vector data formats. (https://www.gdal.org)")
+                        .subcommand_required(true)
                         .subcommand(Command::new("ogr2ogr")
                             .about("Geospatial vector translator. (https://www.gdal.org/ogr2ogr.html)"))
                         .subcommand(Command::new("gdal_translate")
@@ -50,6 +42,7 @@ fn main() {
                 .subcommand(
                     Command::new("csv")
                         .about("Tools for working with CSV files. (https://github.com/faradayio/csv-tools)")
+                        .subcommand_required(true)
                         .subcommand(Command::new("catcsv")
                             .about("Concatenate directories of CSV files. (https://github.com/faradayio/csv-tools/tree/main/catcsv)"))
                         .subcommand(Command::new("fixed2csv")
@@ -72,73 +65,104 @@ fn main() {
         .get_matches();
 
     // ***** Process command line arguments *****
+    // match match_result.subcommand_name() {
+    // Some("init") => commands::init::run(…),
+    // Some("start") => commands::start::run(),
+    // Some("load") => commands::load::run(…),
+    // _ => { let _ = command!().print_help(); }
+    // }
+
     match match_result.subcommand_name() {
         Some("init") => {
             let m = match_result.subcommand_matches("init").unwrap();
             let _dir = m.get_one::<String>("directory");
             // TODO: implement init logic
+            println!("{}", "Running command: init".red());
+            println!("{}", "Copy config.toml to local project directory".yellow());
+            println!("{}", "Add other configuration.".yellow());
+            println!("{}", "Add directories for mapping to containers.".yellow());
         }
         Some("start") => {
             // TODO: implement start logic
+            println!("{}", "Running command: start".red());
+            println!(
+                "{}",
+                "Run containers with selected OCI daemon (podman/docker)".yellow()
+            );
         }
         Some("stop") => {
             // TODO: implement stop logic
+            println!("{}", "Running command: stop".red());
         }
         Some("status") => {
             // TODO: implement status logic
+            println!("{}", "Running command: status".red());
         }
         Some("pgbranch") => {
             let m = match_result.subcommand_matches("pgbranch").unwrap();
             let _name = m.get_one::<String>("name").unwrap();
             // TODO: implement pgbranch logic
+            println!("{}", "Running command: pgbranch".red());
         }
         Some("pgroll") => {
             // TODO: implement pgroll logic
+            println!("{}", "Running command: pgroll".red());
         }
         Some("pull") => {
             // TODO: implement pull logic
+            println!("{}", "Running command: pull".red());
         }
         Some("load") => {
             let m = match_result.subcommand_matches("load").unwrap();
             match m.subcommand_name() {
                 Some("dbcrossbar") => {
                     // TODO: implement load dbcrossbar logic
+                    println!("{}", "Running command: load dbcrossbar".red());
                 }
                 Some("gdal") => {
                     let g = m.subcommand_matches("gdal").unwrap();
                     match g.subcommand_name() {
                         Some("ogr2ogr") => {
                             // TODO: implement load gdal ogr2ogr logic
+                            println!("{}", "Running command: load gdal ogr2ogr".red());
                         }
                         Some("gdal_translate") => {
                             // TODO: implement load gdal gdal_translate logic
+                            println!("{}", "Running command: load gdal gdal_translate".red());
                         }
                         _ => {}
                     }
                 }
                 Some("pgferry") => {
                     // TODO: implement load pgferry logic
+                    println!("{}", "Running command: load pgferry".red());
                 }
                 Some("csv") => {
                     let c = m.subcommand_matches("csv").unwrap();
                     match c.subcommand_name() {
                         Some("catcsv") => {
                             // TODO: implement load csv catcsv logic
+                            println!("{}", "Running command: load csv catcsv".red());
                         }
                         Some("fixed2csv") => {
                             // TODO: implement load csv fixed2csv logic
+                            println!("{}", "Running command: load csv fixed2csv".red());
                         }
                         Some("geochunk") => {
                             // TODO: implement load csv geochunk logic
+                            println!("{}", "Running command: load csv geochunk".red());
                         }
                         Some("geocode-csv") => {
                             // TODO: implement load csv geocode-csv logic
+                            println!("{}", "Running command: load csv geocode-csv".red());
                         }
                         Some("hashcsv") => {
                             // TODO: implement load csv hashcsv logic
+                            println!("{}", "Running command: load csv hashcsv".red());
                         }
                         Some("scrubcsv") => {
                             // TODO: implement load csv scrubcsv logic
+                            println!("{}", "Running command: load csv scrubcsv".red());
                         }
                         _ => {}
                     }
