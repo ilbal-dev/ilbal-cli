@@ -1,6 +1,6 @@
 // src/commands/mod.rs
+pub mod ingest;
 pub mod init;
-pub mod load;
 pub mod pgbranch;
 pub mod pgroll;
 pub mod pull;

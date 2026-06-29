@@ -2,6 +2,7 @@
 use anyhow::Result;
 use clap::ArgMatches;
 use dialoguer::{Confirm, Input, Select};
+use owo_colors::OwoColorize;
 
 pub fn run(matches: &ArgMatches) -> Result<()> {
     let dir = matches
