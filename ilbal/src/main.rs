@@ -17,16 +17,29 @@ fn main() -> anyhow::Result<()> {
         .subcommand(
             Command::new("pgbranch")
                 .about("Git-like actions on local ilbal database")
-                .disable_help_flag(true)
+                // .disable_help_flag(true)
                 .arg(Arg::new("args").num_args(0..).trailing_var_arg(true)),
         )
-        .disable_help_flag(true)
+        // .disable_help_flag(true)
         .subcommand(Command::new("pgroll").about("Push database changes"))
         .subcommand(Command::new("pull").about("Pull database from ilbal cloud"))
         .subcommand(
             Command::new("ingest")
                 .about("Convert, transform, and load data into ilbal database")
-                .arg(Arg::new("args").num_args(0..).trailing_var_arg(true)),
+                .arg(
+                    Arg::new("save")
+                        .long("save")
+                        .short('s')
+                        .num_args(0..=1)
+                        .value_name("data/output.csv")
+                        .help("Save the output to a file"),
+                )
+                .arg(
+                    Arg::new("args")
+                        .num_args(0..)
+                        .trailing_var_arg(true)
+                        .help("Command line arguments unique to each binary"),
+                ),
         )
         .get_matches();
 

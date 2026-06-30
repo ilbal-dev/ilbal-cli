@@ -20,30 +20,43 @@ pub fn run(matches: &ArgMatches) -> anyhow::Result<()> {
 
     match args.split_first() {
         Some((binary, tool_args)) => {
-            Command::new("docker")
-                .arg("run")
-                .arg("--rm")
-                .arg("-v")
-                .arg(&volume)
-                .arg("-w")
-                .arg("/data")
-                .arg(DOCKER_IMAGE)
-                .arg(binary)
-                .args(tool_args)
-                .status()?;
+            let save_file: Option<String> = matches.get_one::<String>("save").cloned();
+
+            match save_file {
+                Some(path) => {
+                    let output = Command::new("docker")
+                        .arg("run")
+                        .arg("--rm")
+                        .arg("-v")
+                        .arg(&volume)
+                        .arg("-w")
+                        .arg("/data")
+                        .arg(DOCKER_IMAGE)
+                        .arg(binary)
+                        .args(tool_args)
+                        .output()?;
+                    std::fs::write(&path, &output.stdout)?;
+                    std::io::stderr().write_all(&output.stderr)?;
+                }
+                None => {
+                    Command::new("docker")
+                        .arg("run")
+                        .arg("--rm")
+                        .arg("-v")
+                        .arg(&volume)
+                        .arg("-w")
+                        .arg("/data")
+                        .arg(DOCKER_IMAGE)
+                        .arg(binary)
+                        .args(tool_args)
+                        .status()?;
+                }
+            }
         }
         None => {
-            let output = Command::new("docker")
-                .arg("run")
-                .arg("--rm")
-                .arg(DOCKER_IMAGE)
-                .arg("ls")
-                .arg("-1")
-                .arg("/bin")
-                .output()?;
-            println!("{}", "Available binaries:".yellow());
-            std::io::stdout().write_all(&output.stdout)?;
             eprintln!("Usage: ilbal ingest <binary> [args...]");
+            println!("{}", "Available binaries:".yellow());
+            // std::io::stdout().write_all(&output.stdout)?;
         }
     }
     Ok(())
