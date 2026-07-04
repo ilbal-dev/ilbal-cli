@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f /tmp/tmp.w8yNVkVnVz -c -o /home/chikaj/Projects/ilbal.dev/ilbal-cli/ilbal/oci/kube/helm
+    kompose.version: 1.38.0 (HEAD)
+  labels:
+    io.kompose.service: postgresql
+  name: postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: postgresql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f /tmp/tmp.w8yNVkVnVz -c -o /home/chikaj/Projects/ilbal.dev/ilbal-cli/ilbal/oci/kube/helm
+        kompose.version: 1.38.0 (HEAD)
+      labels:
+        io.kompose.service: postgresql
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: my-project
+            - name: POSTGRES_PASSWORD
+              value: quack
+            - name: POSTGRES_USER
+              value: duck
+          image: ilbal-postgresql:18
+          name: my-project-postgresql
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: pgdata
+      hostname: my-project-postgresql
+      restartPolicy: Always
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: pgdata

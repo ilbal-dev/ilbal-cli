@@ -1,0 +1,17 @@
+account:
+  name: "Playground"
+
+users:
+  - account: "Playground"
+    email: "${PGADMIN_EMAIL}"
+    password: "${POSTGRES_PASSWORD}"
+
+databases:
+  - name: "${POSTGRES_DB}"
+    username: "${POSTGRES_USER}"
+    password: "${POSTGRES_PASSWORD}"
+    hostname: "${PROJECT_NAME}-postgresql"
+    database: "${POSTGRES_DB}"
+    port: ${POSTGRES_PORT}
+    slot_name: "sequin_slot"
+    publication_name: "sequin_pub"

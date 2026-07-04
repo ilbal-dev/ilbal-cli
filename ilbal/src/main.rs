@@ -1,8 +1,22 @@
 use clap::{Arg, Command, command};
 use indoc::indoc;
 mod commands;
+mod registries;
+mod typedefs;
 
-fn main() -> anyhow::Result<()> {
+fn main() {
+    if let Err(e) = run_program() {
+        if e.downcast_ref::<std::io::Error>()
+            .is_some_and(|io| io.kind() == std::io::ErrorKind::Interrupted)
+        {
+            // Ctrl+C - exit gracefully
+        } else {
+            eprintln!("Error: {e:#}");
+        }
+    }
+}
+
+fn run_program() -> anyhow::Result<()> {
     const INGEST_LONG_HELP: &str = indoc!(
         "Command line arguments unique to each binary
 
@@ -44,6 +58,7 @@ fn main() -> anyhow::Result<()> {
         .subcommand(Command::new("start").about("Start the ilbal database"))
         .subcommand(Command::new("stop").about("Stop the ilbal database"))
         .subcommand(Command::new("status").about("Get the status of the ilbal project"))
+        .subcommand(Command::new("reset").about("Reset the ilbal project"))
         .subcommand(
             Command::new("pgbranch")
                 .about("Git-like actions on local ilbal database")
@@ -57,6 +72,14 @@ fn main() -> anyhow::Result<()> {
     // ***** Process command line arguments *****
     let mut ingest_cmd = ingest_cmd;
     match match_result.subcommand_name() {
+        Some("init") => commands::init::run(),
+        Some("start") => commands::start::run(),
+        Some("stop") => commands::stop::run(),
+        Some("status") => commands::status::run(),
+        Some("reset") => commands::reset::run(),
+        Some("pgbranch") => commands::pgbranch::run(),
+        Some("pgroll") => commands::pgroll::run(),
+        Some("pull") => commands::pull::run(),
         Some("ingest") => commands::ingest::run(
             &mut ingest_cmd,
             match_result.subcommand_matches("ingest").unwrap(),

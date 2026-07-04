@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f /tmp/tmp.w8yNVkVnVz -c -o /home/chikaj/Projects/ilbal.dev/ilbal-cli/ilbal/oci/kube/helm
+    kompose.version: 1.38.0 (HEAD)
+  labels:
+    io.kompose.service: pgdog
+  name: pgdog
+spec:
+  ports:
+    - name: "33332"
+      port: 33332
+      targetPort: 6432
+  selector:
+    io.kompose.service: pgdog

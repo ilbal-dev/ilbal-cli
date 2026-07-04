@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f /tmp/tmp.w8yNVkVnVz -c -o /home/chikaj/Projects/ilbal.dev/ilbal-cli/ilbal/oci/kube/helm
+    kompose.version: 1.38.0 (HEAD)
+  labels:
+    io.kompose.service: pgdog
+  name: pgdog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: pgdog
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f /tmp/tmp.w8yNVkVnVz -c -o /home/chikaj/Projects/ilbal.dev/ilbal-cli/ilbal/oci/kube/helm
+        kompose.version: 1.38.0 (HEAD)
+      labels:
+        io.kompose.service: pgdog
+    spec:
+      containers:
+        - image: pgdog/pgdog:latest
+          name: my-project-pgdog
+          ports:
+            - containerPort: 6432
+              protocol: TCP
+      hostname: my-project-pgdog
+      restartPolicy: Always
