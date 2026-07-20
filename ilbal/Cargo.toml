@@ -15,3 +15,4 @@ serde = { version = "1.0.228", features = ["derive"] }
 toml = "0.8.22"
 thiserror = "2.0.18"
 walkdir = "2.5.0"
+include_dir = "0.7.4"

@@ -1,0 +1,17 @@
+[project]
+name = "miproyecto"
+description = "yada yada"
+authors = ["Natan"]
+
+[runtime]
+runtime = "docker"
+
+[postgresql]
+pg_username = "duck"
+pg_password = "quack"
+pg_uri = "postgresql://duck:quack@localhost:33330/app"
+
+[pgadmin]
+pgadmin_email = "duck@duck.com"
+pgadmin_password = "quack"
+pgadmin_url = "http://localhost:33331/"

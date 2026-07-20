@@ -10,25 +10,10 @@ pub fn run() -> anyhow::Result<()> {
         RuntimeType::Docker => {
             // Stop and remove containers + default network (Compose manages both)
             let down = std::process::Command::new("docker")
-                .args(["compose", "-f", "ilbal/compose.yml", "down"])
+                .args(["compose", "-f", "ilbal/compose.yml", "down", "-v"])
                 .status()?;
             if !down.success() {
                 anyhow::bail!("Failed to bring down Docker Compose services");
-            }
-
-            // Remove volumes (Compose doesn't do this by default)
-            let volume_names = [
-                format!("{project}_pgdata"),
-                format!("{project}_pgadmin_data"),
-                format!("{project}_sequin_redis_data"),
-            ];
-            let vol_rm = std::process::Command::new("docker")
-                .args(["volume", "rm", "-f"])
-                .args(&volume_names)
-                .status()?;
-            if !vol_rm.success() {
-                // volumes may not exist — that's fine, just warn
-                eprintln!("Warning: some volumes could not be removed (may not exist)");
             }
         }
         RuntimeType::Podman => {

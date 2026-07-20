@@ -1,8 +1,8 @@
 // src/commands/init.rs
 use anyhow::Result;
 use dialoguer::{Confirm, Input, Select};
+use include_dir::{Dir, include_dir};
 use owo_colors::OwoColorize;
-use walkdir::WalkDir;
 
 use crate::registries::registry;
 use crate::typedefs::{
@@ -158,41 +158,56 @@ pub fn run() -> Result<()> {
 
         // --- Copy additional configuration files with substitutions
         let subs = [
-            ("${IMAGE_POSTGRES}",    registry::images("postgresql")),
-            ("${IMAGE_PGADMIN}",     registry::images("pgadmin4")),
-            ("${IMAGE_PGDOG}",       registry::images("pgdog")),
-            ("${IMAGE_SEQUIN}",      registry::images("sequin")),
-            ("${IMAGE_REDIS}",       registry::images("redis")),
-            ("${PROJECT_NAME}",      &project),
-            ("${POSTGRES_USER}",     &pg_username),
+            ("${IMAGE_POSTGRES}", registry::images("postgresql")),
+            ("${IMAGE_PGADMIN}", registry::images("pgadmin4")),
+            ("${IMAGE_PGDOG}", registry::images("pgdog")),
+            ("${IMAGE_SEQUIN}", registry::images("sequin")),
+            ("${IMAGE_REDIS}", registry::images("redis")),
+            ("${PROJECT_NAME}", &project),
+            ("${POSTGRES_USER}", &pg_username),
             ("${POSTGRES_PASSWORD}", &pg_password),
-            ("${POSTGRES_DB}",       &pg_db),
-            ("${POSTGRES_PORT}",     &postgres_port.to_string()),
-            ("${PGADMIN_EMAIL}",     &pgadmin_email.to_string()),
-            ("${PGADMIN_PORT}",      &pgadmin_port.to_string()),
-            ("${PGDOG_PORT}",        &pgdog_port.to_string()),
-            ("${SEQUIN_PORT}",       &sequin_port.to_string()),
-            ("${REDIS_PORT}",        &redis_port.to_string()),
+            ("${POSTGRES_DB}", &pg_db),
+            ("${POSTGRES_PORT}", &postgres_port.to_string()),
+            ("${PGADMIN_EMAIL}", &pgadmin_email.to_string()),
+            ("${PGADMIN_PORT}", &pgadmin_port.to_string()),
+            ("${PGDOG_PORT}", &pgdog_port.to_string()),
+            ("${SEQUIN_PORT}", &sequin_port.to_string()),
+            ("${REDIS_PORT}", &redis_port.to_string()),
         ];
 
-        let template_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("template");
+        // let template_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("template");
 
-        for entry in WalkDir::new(&template_dir) {
-            let entry = entry?;
-            let relative = entry.path().strip_prefix(&template_dir)?;
+        // for entry in WalkDir::new(&template_dir) {
+        //     let entry = entry?;
+        //     let relative = entry.path().strip_prefix(&template_dir)?;
+        //     let dest = config_dir.join(relative);
+
+        //     if entry.file_type().is_dir() {
+        //         std::fs::create_dir_all(&dest)?;
+        //     } else {
+        //         let mut content = std::fs::read_to_string(entry.path())?;
+        //         for (key, val) in &subs {
+        //             content = content.replace(key, val);
+        //         }
+        //         std::fs::write(&dest, &content)?;
+        //     }
+        // }
+
+        static TEMPLATE_DIR: Dir = include_dir!("template");
+
+        for entry in TEMPLATE_DIR.files() {
+            let relative = entry.path().strip_prefix("template")?;
             let dest = config_dir.join(relative);
 
-            if entry.file_type().is_dir() {
-                std::fs::create_dir_all(&dest)?;
-            } else {
-                let mut content = std::fs::read_to_string(entry.path())?;
-                for (key, val) in &subs {
-                    content = content.replace(key, val);
-                }
-                std::fs::write(&dest, &content)?;
+            if let Some(parent) = dest.parent() {
+                std::fs::create_dir_all(parent)?;
             }
+            let mut content = entry.contents_utf8().unwrap_or_default().to_string();
+            for (key, val) in &subs {
+                content = content.replace(key, val);
+            }
+            std::fs::write(&dest, &content)?;
         }
-
 
         // let compose = std::fs::read_to_string(template_dir.join("compose.yml"))?
         //     .replace("${IMAGE_POSTGRES}", registry::images("postgresql"))

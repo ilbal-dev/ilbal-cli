@@ -54,10 +54,11 @@ fn run_program() -> anyhow::Result<()> {
             for fast iteration. Tools include database branching, data ingress, and more."
         ))
         .subcommand_required(true)
-        .subcommand(Command::new("init").about("Initialize an ilbal project (default: .)"))
+        .subcommand(Command::new("init").about("Initialize an ilbal project"))
         .subcommand(Command::new("start").about("Start the ilbal database"))
         .subcommand(Command::new("stop").about("Stop the ilbal database"))
         .subcommand(Command::new("status").about("Get the status of the ilbal project"))
+        .subcommand(ingest_cmd.clone())
         .subcommand(Command::new("reset").about("Reset the ilbal project"))
         .subcommand(
             Command::new("pgbranch")
@@ -65,8 +66,8 @@ fn run_program() -> anyhow::Result<()> {
                 .arg(Arg::new("args").num_args(0..).trailing_var_arg(true)),
         )
         .subcommand(Command::new("pgroll").about("Push database changes"))
+        .subcommand(Command::new("push").about("Push database to ilbal cloud"))
         .subcommand(Command::new("pull").about("Pull database from ilbal cloud"))
-        .subcommand(ingest_cmd.clone())
         .get_matches();
 
     // ***** Process command line arguments *****
