@@ -9,11 +9,14 @@
     openssl
     pkg-config
     # rustls is a pure rust option to explore instead of the above
+    # cargo-cross
+    pkgsCross.mingwW64.stdenv.cc
   ];
 
   env = {
     RUST_BACKTRACE = "1";
     CARGO_TERM_COLOR = "always";
+    CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS = "-L${pkgs.pkgsCross.mingwW64.windows.pthreads}/lib";
   };
 
   # https://devenv.sh/languages/
@@ -28,6 +31,11 @@
       "rust-analyzer"
       "rust-src"
       "llvm-tools"
+    ];
+    targets = [
+      "x86_64-pc-windows-gnu"
+      "aarch64-apple-darwin"
+      "x86_64-apple-darwin"
     ];
   };
 

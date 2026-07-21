@@ -175,29 +175,12 @@ pub fn run() -> Result<()> {
             ("${REDIS_PORT}", &redis_port.to_string()),
         ];
 
-        // let template_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("template");
-
-        // for entry in WalkDir::new(&template_dir) {
-        //     let entry = entry?;
-        //     let relative = entry.path().strip_prefix(&template_dir)?;
-        //     let dest = config_dir.join(relative);
-
-        //     if entry.file_type().is_dir() {
-        //         std::fs::create_dir_all(&dest)?;
-        //     } else {
-        //         let mut content = std::fs::read_to_string(entry.path())?;
-        //         for (key, val) in &subs {
-        //             content = content.replace(key, val);
-        //         }
-        //         std::fs::write(&dest, &content)?;
-        //     }
-        // }
-
         static TEMPLATE_DIR: Dir = include_dir!("template");
 
         for entry in TEMPLATE_DIR.files() {
-            let relative = entry.path().strip_prefix("template")?;
-            let dest = config_dir.join(relative);
+            // let relative: std::path::PathBuf = entry.path().components().skip(1).collect();
+            let dest = config_dir.join(entry.path());
+            // let dest = config_dir.join(relative);
 
             if let Some(parent) = dest.parent() {
                 std::fs::create_dir_all(parent)?;
@@ -209,84 +192,22 @@ pub fn run() -> Result<()> {
             std::fs::write(&dest, &content)?;
         }
 
-        // let compose = std::fs::read_to_string(template_dir.join("compose.yml"))?
-        //     .replace("${IMAGE_POSTGRES}", registry::images("postgresql"))
-        //     .replace("${IMAGE_PGADMIN}", registry::images("pgadmin4"))
-        //     .replace("${IMAGE_PGDOG}", registry::images("pgdog"))
-        //     .replace("${IMAGE_SEQUIN}", registry::images("sequin"))
-        //     .replace("${PROJECT_NAME}", &project)
-        //     .replace("${POSTGRES_USER}", &pg_username)
-        //     .replace("${POSTGRES_PASSWORD}", &pg_password)
-        //     .replace("${POSTGRES_DB}", &pg_db)
-        //     .replace("${POSTGRES_PORT}", &postgres_port.to_string())
-        //     .replace("${PGADMIN_EMAIL}", &pgadmin_email.to_string())
-        //     .replace("${PGADMIN_PORT}", &pgadmin_port.to_string())
-        //     .replace("${PGDOG_PORT}", &pgdog_port.to_string())
-        //     .replace("${SEQUIN_PORT}", &sequin_port.to_string())
-        //     .replace("${REDIS_PORT}", &redis_port.to_string());
-        // std::fs::write(config_dir.join("compose.yml"), &compose)?;
-
-        // // TODO: pomdan.yml needs substitution!!
-        // let podman = std::fs::read_to_string(template_dir.join("podman.yml"))?;
-        // std::fs::write(config_dir.join("podman.yml"), &podman)?;
-
-        // // --- postgresql.conf
-        // let pgconfig = std::fs::read_to_string(template_dir.join("postgresql.conf"))?;
-        // std::fs::write(pgconfig_dir.join("postgresql.conf"), &pgconfig)?;
-
-        // // --- Initializing sql script
-        // let init = std::fs::read_to_string(template_dir.join("init.sql"))?
-        //     .replace("${POSTGRES_DB}", &pg_db);
-        // std::fs::write(config_dir.join("init.sql"), &init)?;
-
-        // let pgpass = std::fs::read_to_string(template_dir.join("pgpass"))?
-        //     .replace("${PROJECT_NAME}", &project)
-        //     .replace("${POSTGRES_USER}", &pg_username)
-        //     .replace("${POSTGRES_PASSWORD}", &pg_password)
-        //     .replace("${POSTGRES_DB}", &pg_db)
-        //     .replace("${POSTGRES_PORT}", &postgres_port.to_string());
-        // std::fs::write(config_dir.join("pgpass"), &pgpass)?;
-
-        // let servers = std::fs::read_to_string(template_dir.join("servers.json"))?
-        //     .replace("${PROJECT_NAME}", &project)
-        //     .replace("${POSTGRES_USER}", &pg_username)
-        //     .replace("${POSTGRES_PASSWORD}", &pg_password)
-        //     .replace("${POSTGRES_DB}", &pg_db)
-        //     .replace("${POSTGRES_PORT}", &postgres_port.to_string())
-        //     .replace("${PGADMIN_EMAIL}", &pgadmin_email.to_string())
-        //     .replace("${PGADMIN_PORT}", &pgadmin_port.to_string());
-        // std::fs::write(config_dir.join("servers.json"), &servers)?;
-
-        // let sequin = std::fs::read_to_string(template_dir.join("sequin.yml"))?
-        //     .replace("${PROJECT_NAME}", &project)
-        //     .replace("${POSTGRES_USER}", &pg_username)
-        //     .replace("${POSTGRES_PASSWORD}", &pg_password)
-        //     .replace("${POSTGRES_DB}", &pg_db)
-        //     .replace("${POSTGRES_PORT}", &postgres_port.to_string())
-        //     .replace("${PGADMIN_EMAIL}", &pgadmin_email.to_string())
-        //     .replace("${PGADMIN_PORT}", &pgadmin_port.to_string())
-        //     .replace("${PGDOG_PORT}", &pgdog_port.to_string())
-        //     .replace("${SEQUIN_PORT}", &sequin_port.to_string());
-        // std::fs::write(config_dir.join("sequin.yml"), &sequin)?;
-
         // --- Pull docker images
         match config.runtime.runtime {
             RuntimeType::Docker => {
-                // The image below will be codeberg/ilbal/ilbal-postgresql:latest
-                // let postgres_status = std::process::Command::new("docker")
-                //     .args(["pull", registry::images("postgresql")])
-                //     .status()?;
-                // if !postgres_status.success() {
-                //     anyhow::bail!("Failed to pull PostgreSQL image");
-                // }
+                let postgres_status = std::process::Command::new("docker")
+                    .args(["pull", registry::images("postgresql")])
+                    .status()?;
+                if !postgres_status.success() {
+                    anyhow::bail!("Failed to pull PostgreSQL image");
+                }
 
-                // The image below will be codeberg/ilbal/ilbal-ingest:latest
-                // let ingest_status = std::process::Command::new("docker")
-                //     .args(["pull", registry::images("ingest")])
-                //     .status()?;
-                // if !ingest_status.success() {
-                //     anyhow::bail!("Failed to pull ilbal-ingest image");
-                // }
+                let ingest_status = std::process::Command::new("docker")
+                    .args(["pull", registry::images("ingest")])
+                    .status()?;
+                if !ingest_status.success() {
+                    anyhow::bail!("Failed to pull ilbal-ingest image");
+                }
 
                 let pgadmin_status = std::process::Command::new("docker")
                     .args(["pull", registry::images("pgadmin4")])

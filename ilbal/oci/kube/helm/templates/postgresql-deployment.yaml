@@ -30,7 +30,7 @@ spec:
               value: quack
             - name: POSTGRES_USER
               value: duck
-          image: ilbal-postgresql:18
+          image: codeberg.org/chikaj/ilbal-postgresql:latest
           name: my-project-postgresql
           ports:
             - containerPort: 5432

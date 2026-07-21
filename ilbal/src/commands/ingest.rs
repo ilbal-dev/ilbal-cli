@@ -5,7 +5,7 @@ use owo_colors::OwoColorize;
 use std::io::Write;
 use std::process::Command;
 
-const DOCKER_IMAGE: &str = "ilbal-ingest:0.1.0";
+const DOCKER_IMAGE: &str = "ilbal-ingest:latest";
 
 pub fn run(cmd: &mut clap::Command, matches: &ArgMatches) -> anyhow::Result<()> {
     let cwd = std::env::current_dir()
