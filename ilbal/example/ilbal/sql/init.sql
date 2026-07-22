@@ -1,8 +1,8 @@
 -- Create user with a secure password
-CREATE USER sequin_user WITH PASSWORD '${POSTGRES_PASSWORD}';
+CREATE USER sequin_user WITH PASSWORD 'quack123';
 
 -- Grant connect permission
-GRANT CONNECT ON DATABASE ${POSTGRES_DB} to sequin_user;
+GRANT CONNECT ON DATABASE app to sequin_user;
 
 -- Grant permission to create replication tables
 GRANT CREATE ON SCHEMA public TO sequin_user;

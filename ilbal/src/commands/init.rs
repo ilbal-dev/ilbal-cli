@@ -88,20 +88,18 @@ pub fn run() -> Result<()> {
     // Local dev password
     let pg_password: String = Input::new()
         .with_prompt("Password")
-        .default(String::from("quack"))
+        .default(String::from("quack123"))
         .validate_with(|input: &String| -> Result<(), &str> {
             if input.contains([' ']) {
                 Err("Password cannot contain spaces")
+            } else if input.len() < 8 {
+                Err("Password must be at least 8 characters")
             } else {
                 Ok(())
             }
         })
         .interact_text()?;
 
-    // let pgadmin_email: String = Input::new()
-    //     .with_prompt("PgAdmin4 email")
-    //     .default(String::from("duck@duck.com"))
-    //     .interact_text()?;
     let pgadmin_email: String = String::from("duck@duck.com");
 
     let confirmed = Confirm::new()
@@ -177,19 +175,18 @@ pub fn run() -> Result<()> {
 
         static TEMPLATE_DIR: Dir = include_dir!("template");
 
-        for entry in TEMPLATE_DIR.files() {
-            // let relative: std::path::PathBuf = entry.path().components().skip(1).collect();
-            let dest = config_dir.join(entry.path());
-            // let dest = config_dir.join(relative);
-
-            if let Some(parent) = dest.parent() {
-                std::fs::create_dir_all(parent)?;
+        for entry in TEMPLATE_DIR.find("**/*").unwrap() {
+            if let Some(file) = entry.as_file() {
+                let dest = config_dir.join(file.path());
+                if let Some(parent) = dest.parent() {
+                    std::fs::create_dir_all(parent)?;
+                }
+                let mut content = file.contents_utf8().unwrap_or_default().to_string();
+                for (key, val) in &subs {
+                    content = content.replace(key, val);
+                }
+                std::fs::write(&dest, &content)?;
             }
-            let mut content = entry.contents_utf8().unwrap_or_default().to_string();
-            for (key, val) in &subs {
-                content = content.replace(key, val);
-            }
-            std::fs::write(&dest, &content)?;
         }
 
         // --- Pull docker images
@@ -247,7 +244,11 @@ pub fn run() -> Result<()> {
             }
         }
 
-        println!("{}", format!("Initialized at {project}").green());
+        println!("{}", format!("Project Initialized!").green());
+        println!(
+            "{}",
+            format!("Run `cd {project}`, then `ilbal start`").green()
+        );
         Ok(())
     } else {
         println!("{}", "Cancelled.".yellow());

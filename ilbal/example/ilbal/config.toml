@@ -1,0 +1,17 @@
+[project]
+name = "example"
+description = "My Example Project"
+authors = ["Nate"]
+
+[runtime]
+runtime = "docker"
+
+[postgresql]
+pg_username = "duck"
+pg_password = "quack123"
+pg_uri = "postgresql://duck:quack123@localhost:33330/app"
+
+[pgadmin]
+pgadmin_email = "duck@duck.com"
+pgadmin_password = "quack123"
+pgadmin_url = "http://localhost:33331/"
