@@ -1,3 +1,5 @@
+/*
+-- SEQUIN SETUP
 -- Create user with a secure password
 CREATE USER sequin_user WITH PASSWORD '${POSTGRES_PASSWORD}';
 
@@ -15,7 +17,14 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public to sequin_user;
 
 -- Grant replication permission
 ALTER USER sequin_user WITH REPLICATION;
+*/
 
 -- Create publication and slot
 CREATE PUBLICATION sequin_pub FOR ALL TABLES WITH (publish_via_partition_root = true);
 SELECT pg_create_logical_replication_slot('sequin_slot', 'pgoutput');
+
+-- PGDOG SETUP
+CREATE ROLE pgdog LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER WITH PASSWORD '${POSTGRES_PASSWORD}';
+CREATE ROLE authenticator LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
+CREATE ROLE anonymous NOLOGIN;
+CREATE ROLE webuser NOLOGIN;

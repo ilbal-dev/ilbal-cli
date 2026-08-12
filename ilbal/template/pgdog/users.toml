@@ -1,0 +1,4 @@
+[[users]]
+name = "pgdog"
+database = "${POSTGRES_DB}"
+password = "${POSTGRES_PASSWORD}"
