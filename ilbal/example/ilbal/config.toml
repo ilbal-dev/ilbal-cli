@@ -1,6 +1,6 @@
 [project]
 name = "example"
-description = "My Example Project"
+description = "An Example Project"
 authors = ["Nate"]
 
 [runtime]

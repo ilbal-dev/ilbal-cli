@@ -1,3 +1,5 @@
+name: ${PROJECT_NAME}
+
 services:
   postgresql:
     image: docker.io/ilbal/ilbal-postgresql:latest
@@ -18,7 +20,7 @@ services:
       - ./postgres/postgresql.conf:/postgres/postgresql.conf:ro
       - ./postgres/pg_hba.conf:/postgres/pg_hba.conf:ro
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d ${PROJECT_NAME}"]
       interval: 10s
@@ -45,7 +47,7 @@ services:
       - ./pgadmin4/servers.json:/pgadmin4/servers.json
       - ./pgadmin4/pgpass:/pgadmin4/pgpass
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -62,7 +64,7 @@ services:
       - ./pgdog/pgdog.toml:/pgdog/pgdog.toml
       - ./pgdog/users.toml:/pgdog/users.toml
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -79,7 +81,7 @@ services:
     volumes:
       - sequin_redis_data:/data
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
 
   sequin:
     image: docker.io/sequin/sequin:latest
@@ -104,7 +106,7 @@ services:
     volumes:
       - ./sequin/sequin.yml:/config/sequin.yml
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -117,5 +119,6 @@ volumes:
   sequin_redis_data:
 
 networks:
-  ${PROJECT_NAME}:
+  ${PROJECT_NAME}_network:
+    name: ${PROJECT_NAME}
     driver: bridge

@@ -1,3 +1,5 @@
+name: example
+
 services:
   postgresql:
     image: docker.io/ilbal/ilbal-postgresql:latest
@@ -18,7 +20,7 @@ services:
       - ./postgres/pg_hba.conf:/postgres/pg_hba.conf:ro
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - example
+      - example_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U duck -d app"]
       interval: 10s
@@ -45,7 +47,7 @@ services:
       - ./pgadmin4/servers.json:/pgadmin4/servers.json
       - ./pgadmin4/pgpass:/pgadmin4/pgpass
     networks:
-      - example
+      - example_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -62,7 +64,7 @@ services:
       - ./pgdog/pgdog.toml:/pgdog/pgdog.toml
       - ./pgdog/users.toml:/pgdog/users.toml
     networks:
-      - example
+      - example_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -79,7 +81,7 @@ services:
     volumes:
       - sequin_redis_data:/data
     networks:
-      - example
+      - example_network
 
   sequin:
     image: docker.io/sequin/sequin:latest
@@ -105,7 +107,7 @@ services:
     volumes:
       - ./sequin/sequin.yml:/config/sequin.yml
     networks:
-      - example
+      - example_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -118,5 +120,6 @@ volumes:
   sequin_redis_data:
 
 networks:
-  example:
+  example_network:
+    name: example
     driver: bridge
