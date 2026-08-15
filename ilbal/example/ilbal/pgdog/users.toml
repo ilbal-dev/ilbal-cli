@@ -1,4 +1,4 @@
 [[users]]
-name = "pgdog"
+name = "authenticator"
 database = "app"
 password = "quack123"

@@ -1,3 +1,8 @@
+[admin]
+name = "admin"        # default: admin
+user = "admin"        # default: admin — doesn't need an entry in users.toml
+password = "quack123"
+
 [[databases]]
-name = "duck"
-host = "localhost"
+name = "app"
+host = "postgresql"

@@ -110,12 +110,13 @@ pub fn run() -> Result<()> {
     // --- PROCESS INPUTS ---
     if confirmed {
         // Assign ports
-        let ports = find_ports(5)?;
+        let ports = find_ports(6)?;
         let postgres_port = ports[0];
         let pgadmin_port = ports[1];
         let pgdog_port = ports[2];
         let sequin_port = ports[3];
         let redis_port = ports[4];
+        let martin_port = ports[5];
 
         // Create the following diretory structure
         let project_dir = std::path::Path::new(&project);
@@ -159,6 +160,7 @@ pub fn run() -> Result<()> {
             ("${IMAGE_POSTGRES}", registry::images("postgresql")),
             ("${IMAGE_PGADMIN}", registry::images("pgadmin4")),
             ("${IMAGE_PGDOG}", registry::images("pgdog")),
+            ("${IMAGE_MARTIN}", registry::images("martin")),
             ("${IMAGE_SEQUIN}", registry::images("sequin")),
             ("${IMAGE_REDIS}", registry::images("redis")),
             ("${PROJECT_NAME}", &project),
@@ -171,6 +173,7 @@ pub fn run() -> Result<()> {
             ("${PGDOG_PORT}", &pgdog_port.to_string()),
             ("${SEQUIN_PORT}", &sequin_port.to_string()),
             ("${REDIS_PORT}", &redis_port.to_string()),
+            ("${MARTIN_PORT}", &martin_port.to_string()),
         ];
 
         static TEMPLATE_DIR: Dir = include_dir!("template");
@@ -218,6 +221,13 @@ pub fn run() -> Result<()> {
                     .status()?;
                 if !pgdog_status.success() {
                     anyhow::bail!("Failed to pull pgDog image");
+                }
+
+                let martin_status = std::process::Command::new("docker")
+                    .args(["pull", registry::images("martin")])
+                    .status()?;
+                if !martin_status.success() {
+                    anyhow::bail!("Failed to pull Martin image");
                 }
 
                 let sequin_status = std::process::Command::new("docker")
