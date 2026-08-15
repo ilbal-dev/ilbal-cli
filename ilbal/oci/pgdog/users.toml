@@ -1,0 +1,4 @@
+[[users]]
+name = "authenticator"
+database = "${POSTGRES_DB}"
+password = "${POSTGRES_PASSWORD}"
