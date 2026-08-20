@@ -1,11 +1,36 @@
 use crate::typedefs::binaries::BINARIES;
 use clap::ArgMatches;
+use console::style;
 use dialoguer::Select;
+use dialoguer::theme::Theme;
 use owo_colors::OwoColorize;
+use std::fmt;
 use std::io::Write;
 use std::process::Command;
 
 const DOCKER_IMAGE: &str = "ilbal-ingest:latest";
+
+struct SelectTheme;
+
+impl Theme for SelectTheme {
+    fn format_select_prompt_item(
+        &self,
+        f: &mut dyn fmt::Write,
+        text: &str,
+        active: bool,
+    ) -> fmt::Result {
+        if active {
+            write!(
+                f,
+                "{} {}",
+                style(">").for_stderr().cyan().bold(),
+                style(text).for_stderr().cyan().bold()
+            )
+        } else {
+            write!(f, "  {text}")
+        }
+    }
+}
 
 pub fn run(cmd: &mut clap::Command, matches: &ArgMatches) -> anyhow::Result<()> {
     let cwd = std::env::current_dir()
@@ -59,7 +84,7 @@ pub fn run(cmd: &mut clap::Command, matches: &ArgMatches) -> anyhow::Result<()> 
             cmd.print_help()?;
             println!();
             println!("{}", "Available binaries:".yellow());
-            Select::new()
+            Select::with_theme(&SelectTheme)
                 .with_prompt("Press Enter to close")
                 .items(BINARIES)
                 .max_length(10)
@@ -68,68 +93,3 @@ pub fn run(cmd: &mut clap::Command, matches: &ArgMatches) -> anyhow::Result<()> 
     }
     Ok(())
 }
-
-// const BINARIES: &[&str] = &[
-//     "catcsv",
-//     "cs2cs",
-//     "dbcrossbar",
-//     "fixed2csv",
-//     "gdal",
-//     "gdal-config",
-//     "gdal2tiles",
-//     "gdal2xyz",
-//     "gdal_calc",
-//     "gdal_contour",
-//     "gdal_create",
-//     "gdal_edit",
-//     "gdal_fillnodata",
-//     "gdal_footprint",
-//     "gdal_grid",
-//     "gdal_merge",
-//     "gdal_pansharpen",
-//     "gdal_polygonize",
-//     "gdal_proximity",
-//     "gdal_rasterize",
-//     "gdal_retile",
-//     "gdal_sieve",
-//     "gdal_translate",
-//     "gdal_viewshed",
-//     "gdaladdo",
-//     "gdalattachpct",
-//     "gdalbuildvrt",
-//     "gdalcompare",
-//     "gdaldem",
-//     "gdalenhance",
-//     "gdalinfo",
-//     "gdallocationinfo",
-//     "gdalmanage",
-//     "gdalmdiminfo",
-//     "gdalmdimtranslate",
-//     "gdalmove",
-//     "gdalsrsinfo",
-//     "gdaltindex",
-//     "gdaltransform",
-//     "gdalwarp",
-//     "geochunk",
-//     "geocode-csv",
-//     "geod",
-//     "gie",
-//     "gnmanalyse",
-//     "gnmmanage",
-//     "hashcsv",
-//     "invgeod",
-//     "invproj",
-//     "nearblack",
-//     "ogr2ogr",
-//     "ogr_layer_algebra",
-//     "ogrinfo",
-//     "ogrlineref",
-//     "ogrmerge",
-//     "ogrtindex",
-//     "pct2rgb",
-//     "proj",
-//     "projinfo",
-//     "projsync",
-//     "rgb2pct",
-//     "scrubcsv",
-// ];

@@ -3,6 +3,39 @@ use indoc::indoc;
 mod commands;
 mod registries;
 mod typedefs;
+use owo_colors::OwoColorize;
+
+fn gradient(t: f32) -> (u8, u8, u8) {
+    let lerp = |a: u8, b: u8| (a as f32 + (b as f32 - a as f32) * t).round() as u8;
+    (lerp(255, 0), lerp(165, 255), lerp(0, 255))
+}
+
+fn print_banner() -> anyhow::Result<()> {
+    let font = figlet_rs::FIGlet::standard().map_err(anyhow::Error::msg)?;
+    let figure = font.convert("ilbal.dev").expect("ascii renders fine");
+    let text = figure.as_str();
+    let width = text.lines().next().map_or(1, |l| l.chars().count().max(1));
+    let gradient_text = text
+        .lines()
+        .map(|line| {
+            line.chars()
+                .enumerate()
+                .map(|(i, c)| {
+                    let t = if width > 1 {
+                        i as f32 / (width - 1) as f32
+                    } else {
+                        0.0
+                    };
+                    let (r, g, b) = gradient(t);
+                    format!("{}", c.truecolor(r, g, b))
+                })
+                .collect::<String>()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    println!("{gradient_text}");
+    Ok(())
+}
 
 fn main() {
     if let Err(e) = run_program() {
@@ -48,12 +81,15 @@ fn run_program() -> anyhow::Result<()> {
         );
 
     // ***** Collect command line arguments *****
-    let match_result = command!()
-        .about(indoc!(
-            "The ilbal CLI provides collaborative database-centric development workflows
+    let mut cmd = command!()
+        .about(
+            indoc!(
+                "The ilbal CLI provides collaborative database-centric development workflows
             for fast iteration. Tools include database branching, data ingress, and more."
-        ))
-        .subcommand_required(true)
+            )
+            .cyan()
+            .to_string(),
+        )
         .subcommand(Command::new("init").about("Initialize an ilbal project"))
         .subcommand(Command::new("start").about("Start the ilbal database"))
         .subcommand(Command::new("stop").about("Stop the ilbal database"))
@@ -67,8 +103,19 @@ fn run_program() -> anyhow::Result<()> {
         )
         .subcommand(Command::new("pgroll").about("Push database changes"))
         .subcommand(Command::new("push").about("Push database to ilbal cloud"))
-        .subcommand(Command::new("pull").about("Pull database from ilbal cloud"))
-        .get_matches();
+        .subcommand(Command::new("pull").about("Pull database from ilbal cloud"));
+
+    let match_result = match cmd.clone().try_get_matches() {
+        Ok(matches) => matches,
+        Err(e) => {
+            if e.kind() == clap::error::ErrorKind::DisplayHelp {
+                print_banner()?;
+                e.print()?;
+                return Ok(());
+            }
+            e.exit();
+        }
+    };
 
     // ***** Process command line arguments *****
     let mut ingest_cmd = ingest_cmd;
@@ -85,6 +132,11 @@ fn run_program() -> anyhow::Result<()> {
             &mut ingest_cmd,
             match_result.subcommand_matches("ingest").unwrap(),
         ),
-        _ => Ok(()),
+        None => {
+            print_banner()?;
+            cmd.print_help()?;
+            Ok(())
+        }
+        Some(_) => Ok(()),
     }
 }
