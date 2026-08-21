@@ -1,6 +1,8 @@
+name: ${PROJECT_NAME}
+
 services:
   postgresql:
-    image: codeberg.org/ilbal/ilbal-postgresql:latest
+    image: ${IMAGE_POSTGRES}
     pull_policy: missing
     container_name: ${PROJECT_NAME}-postgresql
     hostname: ${PROJECT_NAME}-postgresql
@@ -18,7 +20,7 @@ services:
       - ./postgres/pg_hba.conf:/postgres/pg_hba.conf:ro
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -28,7 +30,7 @@ services:
       start_interval: 1s
 
   pgadmin4:
-    image: docker.io/dpage/pgadmin4:latest
+    image: ${IMAGE_PGADMIN}
     pull_policy: missing
     container_name: ${PROJECT_NAME}-pgadmin4
     hostname: ${PROJECT_NAME}-pgadmin4
@@ -45,13 +47,48 @@ services:
       - ./pgadmin4/servers.json:/pgadmin4/servers.json
       - ./pgadmin4/pgpass:/pgadmin4/pgpass
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
     depends_on:
       postgresql:
         condition: service_healthy
 
+  martin:
+    image: ${IMAGE_MARTIN}
+    pull_policy: missing
+    container_name: ${PROJECT_NAME}-martin
+    hostname: ${PROJECT_NAME}-martin
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://authenticator:${POSTGRES_PASSWORD}@pgdog:6432/${POSTGRES_DB}?options=-c%20role%3Dwebuser
+    command:
+      - --webui
+      - enable-for-all
+    ports:
+      - "${MARTIN_PORT}:3000"
+    networks:
+      - ${PROJECT_NAME}_network
+    depends_on:
+      pgdog:
+        condition: service_started
+
+  seaweedfs:
+    image: ${IMAGE_SEAWEEDFS}
+    pull_policy: missing
+    container_name: ${PROJECT_NAME}-seaweedfs
+    hostname: ${PROJECT_NAME}-seaweedfs
+    restart: unless-stopped
+    ports:
+      - "${SEAWEEDFS_S3_PORT}:8333"
+      - "${SEAWEEDFS_MASTER_PORT}:9333"
+      - "${SEAWEEDFS_VOLUME_PORT}:9340"
+      - "${SEAWEEDFS_FILER_PORT}:8888"
+      - "${SEAWEEDFS_WEBDAV_PORT}:7333"
+      - "${SEAWEEDFS_ADMIN_PORT}:23646"
+    networks:
+      - ${PROJECT_NAME}_network
+
   pgdog:
-    image: ghcr.io/pgdogdev/pgdog:latest
+    image: ${IMAGE_PGDOG}
     pull_policy: missing
     container_name: ${PROJECT_NAME}-pgdog
     hostname: ${PROJECT_NAME}-pgdog
@@ -62,13 +99,13 @@ services:
       - ./pgdog/pgdog.toml:/pgdog/pgdog.toml
       - ./pgdog/users.toml:/pgdog/users.toml
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
     depends_on:
       postgresql:
         condition: service_healthy
 
   sequin-redis:
-    image: docker.io/library/redis:latest
+    image: ${IMAGE_REDIS}
     pull_policy: missing # could be `always`, too
     container_name: ${PROJECT_NAME}-redis
     hostname: ${PROJECT_NAME}-redis
@@ -79,10 +116,10 @@ services:
     volumes:
       - sequin_redis_data:/data
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
 
   sequin:
-    image: docker.io/sequin/sequin:latest
+    image: ${IMAGE_SEQUIN}
     pull_policy: missing # could be `always`, too
     container_name: ${PROJECT_NAME}-sequin
     hostname: ${PROJECT_NAME}-sequin
@@ -105,7 +142,7 @@ services:
     volumes:
       - ./sequin/sequin.yml:/config/sequin.yml
     networks:
-      - ${PROJECT_NAME}
+      - ${PROJECT_NAME}_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -118,5 +155,6 @@ volumes:
   sequin_redis_data:
 
 networks:
-  ${PROJECT_NAME}:
+  ${PROJECT_NAME}_network:
+    name: ${PROJECT_NAME}
     driver: bridge

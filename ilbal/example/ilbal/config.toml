@@ -1,7 +1,7 @@
 [project]
 name = "example"
-description = "My Example Project"
-authors = ["Nate"]
+description = "An Example Project"
+authors = ["Nate Currit", "Joe Schmoe"]
 
 [runtime]
 runtime = "docker"
@@ -15,3 +15,25 @@ pg_uri = "postgresql://duck:quack123@localhost:33330/app"
 pgadmin_email = "duck@duck.com"
 pgadmin_password = "quack123"
 pgadmin_url = "http://localhost:33331/"
+
+[martin]
+martin_url = "http://localhost:33332"
+
+[seaweedfs]
+seaweedfs_s3_url = "http://localhost:33333"
+seaweedfs_master_url = "http://localhost:33334"
+seaweedfs_volume_url = "http://localhost:33335"
+seaweedfs_filer_url = "http://localhost:33336"
+seaweedfs_webdav_url = "http://localhost:33337"
+seaweedfs_admin_url = "http://localhost:33338"
+
+[sequin]
+sequin_url = "http://localhost:33339"
+sequin_email = "duck@duck.com"
+sequin_password = "quack123"
+
+[pgdog]
+pgdog_url = "http://localhost:33340"
+
+[redis]
+redis_url = "http://localhost:33341"

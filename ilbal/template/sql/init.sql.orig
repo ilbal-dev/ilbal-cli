@@ -1,3 +1,5 @@
+/*
+-- SEQUIN SETUP
 -- Create user with a secure password
 CREATE USER sequin_user WITH PASSWORD '${POSTGRES_PASSWORD}';
 
@@ -21,6 +23,13 @@ ALTER USER sequin_user WITH REPLICATION;
 CREATE PUBLICATION sequin_pub FOR ALL TABLES WITH (publish_via_partition_root = true);
 SELECT pg_create_logical_replication_slot('sequin_slot', 'pgoutput');
 
+<<<<<<< HEAD
+-- PGDOG SETUP
+CREATE ROLE pgdog LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER WITH PASSWORD '${POSTGRES_PASSWORD}';
+CREATE ROLE authenticator LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
+CREATE ROLE anonymous NOLOGIN;
+CREATE ROLE webuser NOLOGIN;
+=======
 -- Create roles for web app access
 CREATE ROLE authenticator WITH LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${POSTGRES_PASSWORD}';
 CREATE ROLE webuser WITH NOLOGIN;
@@ -37,3 +46,4 @@ CREATE EXTENSION "uuid-ossp" SCHEMA extensions;
 CREATE EXTENSION pgcrypto SCHEMA extensions;
 CREATE EXTENSION pgjwt SCHEMA extensions;
 CREATE EXTENSION postgis SCHEMA extensions;
+>>>>>>> new-pull

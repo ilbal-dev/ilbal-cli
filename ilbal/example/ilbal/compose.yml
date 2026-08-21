@@ -1,6 +1,8 @@
+name: example
+
 services:
   postgresql:
-    image: codeberg.org/ilbal/ilbal-postgresql:latest
+    image: docker.io/ilbal/ilbal-postgresql:latest
     pull_policy: missing
     container_name: example-postgresql
     hostname: example-postgresql
@@ -18,7 +20,7 @@ services:
       - ./postgres/pg_hba.conf:/postgres/pg_hba.conf:ro
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - example
+      - example_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U duck -d app"]
       interval: 10s
@@ -45,10 +47,45 @@ services:
       - ./pgadmin4/servers.json:/pgadmin4/servers.json
       - ./pgadmin4/pgpass:/pgadmin4/pgpass
     networks:
-      - example
+      - example_network
     depends_on:
       postgresql:
         condition: service_healthy
+
+  martin:
+    image: ghcr.io/maplibre/martin:1.13.0
+    pull_policy: missing
+    container_name: example-martin
+    hostname: example-martin
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://authenticator:quack123@pgdog:6432/app?options=-c%20role%3Dwebuser
+    command:
+      - --webui
+      - enable-for-all
+    ports:
+      - "33332:3000"
+    networks:
+      - example_network
+    depends_on:
+      pgdog:
+        condition: service_started
+
+  seaweedfs:
+    image: docker.io/chrislusf/seaweedfs:latest
+    pull_policy: missing
+    container_name: example-seaweedfs
+    hostname: example-seaweedfs
+    restart: unless-stopped
+    ports:
+      - "33333:8333"
+      - "33334:9333"
+      - "33335:9340"
+      - "33336:8888"
+      - "33337:7333"
+      - "33338:23646"
+    networks:
+      - example_network
 
   pgdog:
     image: ghcr.io/pgdogdev/pgdog:latest
@@ -57,12 +94,12 @@ services:
     hostname: example-pgdog
     restart: unless-stopped
     ports:
-      - "33332:6432"
+      - "33340:6432"
     volumes:
       - ./pgdog/pgdog.toml:/pgdog/pgdog.toml
       - ./pgdog/users.toml:/pgdog/users.toml
     networks:
-      - example
+      - example_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -74,12 +111,12 @@ services:
     hostname: example-redis
     restart: unless-stopped
     ports:
-      - "33334:6379"
+      - "33341:6379"
     command: ["redis-server", "--port", "6379"]
     volumes:
       - sequin_redis_data:/data
     networks:
-      - example
+      - example_network
 
   sequin:
     image: docker.io/sequin/sequin:latest
@@ -101,11 +138,11 @@ services:
       - REDIS_URL=redis://example-redis:6379
       - CONFIG_FILE_PATH=/config/sequin.yml
     ports:
-      - "33333:7376"
+      - "33339:7376"
     volumes:
       - ./sequin/sequin.yml:/config/sequin.yml
     networks:
-      - example
+      - example_network
     depends_on:
       postgresql:
         condition: service_healthy
@@ -118,5 +155,6 @@ volumes:
   sequin_redis_data:
 
 networks:
-  example:
+  example_network:
+    name: example
     driver: bridge

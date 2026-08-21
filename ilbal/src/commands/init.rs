@@ -3,10 +3,13 @@ use anyhow::Result;
 use dialoguer::{Confirm, Input, Select};
 use include_dir::{Dir, include_dir};
 use owo_colors::OwoColorize;
+use std::process::Command;
 
 use crate::registries::registry;
+use crate::typedefs::SelectTheme;
 use crate::typedefs::{
-    Config, PgadminConfig, PostgresqlConfig, ProjectConfig, RuntimeConfig, structs::RuntimeType,
+    Config, MartinConfig, PgadminConfig, PgdogConfig, PostgresqlConfig, ProjectConfig, RedisConfig,
+    RuntimeConfig, SeaweedfsConfig, SequinConfig, structs::RuntimeType,
 };
 
 pub fn run() -> Result<()> {
@@ -49,7 +52,8 @@ pub fn run() -> Result<()> {
     // --- Runtime, Docker or Podman
     let runtime_types = [RuntimeType::Podman, RuntimeType::Docker];
 
-    let runtime_idx = Select::new()
+    // let runtime_idx = Select::new()
+    let runtime_idx = Select::with_theme(&SelectTheme)
         .with_prompt("Container runtime")
         .items(&runtime_types)
         .default(0)
@@ -110,12 +114,19 @@ pub fn run() -> Result<()> {
     // --- PROCESS INPUTS ---
     if confirmed {
         // Assign ports
-        let ports = find_ports(5)?;
+        let ports = find_ports(12)?;
         let postgres_port = ports[0];
         let pgadmin_port = ports[1];
-        let pgdog_port = ports[2];
-        let sequin_port = ports[3];
-        let redis_port = ports[4];
+        let martin_port = ports[2];
+        let seaweedfs_s3_port = ports[3];
+        let seaweedfs_master_port = ports[4];
+        let seaweedfs_volume_port = ports[5];
+        let seaweedfs_filer_port = ports[6];
+        let seaweedfs_webdav_port = ports[7];
+        let seaweedfs_admin_port = ports[8];
+        let sequin_port = ports[9];
+        let pgdog_port = ports[10];
+        let redis_port = ports[11];
 
         // Create the following diretory structure
         let project_dir = std::path::Path::new(&project);
@@ -148,6 +159,28 @@ pub fn run() -> Result<()> {
                 pgadmin_password: pg_password.clone(),
                 pgadmin_url: format!("http://localhost:{pgadmin_port}/"),
             },
+            martin: MartinConfig {
+                martin_url: format!("http://localhost:{martin_port}"),
+            },
+            seaweedfs: SeaweedfsConfig {
+                seaweedfs_s3_url: format!("http://localhost:{seaweedfs_s3_port}"),
+                seaweedfs_master_url: format!("http://localhost:{seaweedfs_master_port}"),
+                seaweedfs_volume_url: format!("http://localhost:{seaweedfs_volume_port}"),
+                seaweedfs_filer_url: format!("http://localhost:{seaweedfs_filer_port}"),
+                seaweedfs_webdav_url: format!("http://localhost:{seaweedfs_webdav_port}"),
+                seaweedfs_admin_url: format!("http://localhost:{seaweedfs_admin_port}"),
+            },
+            sequin: SequinConfig {
+                sequin_url: format!("http://localhost:{sequin_port}"),
+                sequin_email: pgadmin_email.clone(),
+                sequin_password: pg_password.clone(),
+            },
+            pgdog: PgdogConfig {
+                pgdog_url: format!("http://localhost:{pgdog_port}"),
+            },
+            redis: RedisConfig {
+                redis_url: format!("http://localhost:{redis_port}"),
+            },
         };
         // ...and save it to config.toml
         let config_path = config_dir.join("config.toml");
@@ -158,8 +191,10 @@ pub fn run() -> Result<()> {
         let subs = [
             ("${IMAGE_POSTGRES}", registry::images("postgresql")),
             ("${IMAGE_PGADMIN}", registry::images("pgadmin4")),
-            ("${IMAGE_PGDOG}", registry::images("pgdog")),
+            ("${IMAGE_MARTIN}", registry::images("martin")),
+            ("${IMAGE_SEAWEEDFS}", registry::images("seaweedfs")),
             ("${IMAGE_SEQUIN}", registry::images("sequin")),
+            ("${IMAGE_PGDOG}", registry::images("pgdog")),
             ("${IMAGE_REDIS}", registry::images("redis")),
             ("${PROJECT_NAME}", &project),
             ("${POSTGRES_USER}", &pg_username),
@@ -168,8 +203,24 @@ pub fn run() -> Result<()> {
             ("${POSTGRES_PORT}", &postgres_port.to_string()),
             ("${PGADMIN_EMAIL}", &pgadmin_email.to_string()),
             ("${PGADMIN_PORT}", &pgadmin_port.to_string()),
-            ("${PGDOG_PORT}", &pgdog_port.to_string()),
+            ("${MARTIN_PORT}", &martin_port.to_string()),
+            ("${SEAWEEDFS_S3_PORT}", &seaweedfs_s3_port.to_string()),
+            (
+                "${SEAWEEDFS_MASTER_PORT}",
+                &seaweedfs_master_port.to_string(),
+            ),
+            (
+                "${SEAWEEDFS_VOLUME_PORT}",
+                &seaweedfs_volume_port.to_string(),
+            ),
+            ("${SEAWEEDFS_FILER_PORT}", &seaweedfs_filer_port.to_string()),
+            (
+                "${SEAWEEDFS_WEBDAV_PORT}",
+                &seaweedfs_webdav_port.to_string(),
+            ),
+            ("${SEAWEEDFS_ADMIN_PORT}", &seaweedfs_admin_port.to_string()),
             ("${SEQUIN_PORT}", &sequin_port.to_string()),
+            ("${PGDOG_PORT}", &pgdog_port.to_string()),
             ("${REDIS_PORT}", &redis_port.to_string()),
         ];
 
@@ -192,42 +243,56 @@ pub fn run() -> Result<()> {
         // --- Pull docker images
         match config.runtime.runtime {
             RuntimeType::Docker => {
-                let postgres_status = std::process::Command::new("docker")
+                let postgres_status = Command::new("docker")
                     .args(["pull", registry::images("postgresql")])
                     .status()?;
                 if !postgres_status.success() {
                     anyhow::bail!("Failed to pull PostgreSQL image");
                 }
 
-                let ingest_status = std::process::Command::new("docker")
+                let ingest_status = Command::new("docker")
                     .args(["pull", registry::images("ingest")])
                     .status()?;
                 if !ingest_status.success() {
                     anyhow::bail!("Failed to pull ilbal-ingest image");
                 }
 
-                let pgadmin_status = std::process::Command::new("docker")
+                let pgadmin_status = Command::new("docker")
                     .args(["pull", registry::images("pgadmin4")])
                     .status()?;
                 if !pgadmin_status.success() {
                     anyhow::bail!("Failed to pull pgAdmin4 image");
                 }
 
-                let pgdog_status = std::process::Command::new("docker")
-                    .args(["pull", registry::images("pgdog")])
+                let martin_status = Command::new("docker")
+                    .args(["pull", registry::images("martin")])
                     .status()?;
-                if !pgdog_status.success() {
-                    anyhow::bail!("Failed to pull pgDog image");
+                if !martin_status.success() {
+                    anyhow::bail!("Failed to pull Martin image");
                 }
 
-                let sequin_status = std::process::Command::new("docker")
+                let seaweedfs_status = Command::new("docker")
+                    .args(["pull", registry::images("seaweedfs")])
+                    .status()?;
+                if !seaweedfs_status.success() {
+                    anyhow::bail!("Failed to pull SeaweedFS image");
+                }
+
+                let sequin_status = Command::new("docker")
                     .args(["pull", registry::images("sequin")])
                     .status()?;
                 if !sequin_status.success() {
                     anyhow::bail!("Failed to pull pgDog image");
                 }
 
-                let redis_status = std::process::Command::new("docker")
+                let pgdog_status = Command::new("docker")
+                    .args(["pull", registry::images("pgdog")])
+                    .status()?;
+                if !pgdog_status.success() {
+                    anyhow::bail!("Failed to pull pgDog image");
+                }
+
+                let redis_status = Command::new("docker")
                     .args(["pull", registry::images("redis")])
                     .status()?;
                 if !redis_status.success() {
@@ -235,7 +300,7 @@ pub fn run() -> Result<()> {
                 }
             }
             RuntimeType::Podman => {
-                let status = std::process::Command::new("podman")
+                let status = Command::new("podman")
                     .args(["play", "kube", "ilbal/podman.yml"])
                     .status()?;
                 if !status.success() {

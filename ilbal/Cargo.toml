@@ -16,3 +16,5 @@ toml = "0.8.22"
 thiserror = "2.0.18"
 walkdir = "2.5.0"
 include_dir = { version = "0.7.4", features = ["glob"] }
+console = "0.16.4"
+figlet-rs = "1.0.0"
