@@ -3,6 +3,7 @@ use indoc::indoc;
 mod commands;
 mod registries;
 mod typedefs;
+mod ui;
 use owo_colors::OwoColorize;
 
 fn gradient(t: f32) -> (u8, u8, u8) {

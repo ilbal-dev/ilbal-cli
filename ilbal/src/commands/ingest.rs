@@ -1,36 +1,12 @@
-use crate::typedefs::binaries::BINARIES;
+use crate::typedefs::BINARIES;
+use crate::typedefs::SelectTheme;
 use clap::ArgMatches;
-use console::style;
 use dialoguer::Select;
-use dialoguer::theme::Theme;
 use owo_colors::OwoColorize;
-use std::fmt;
 use std::io::Write;
 use std::process::Command;
 
 const DOCKER_IMAGE: &str = "ilbal-ingest:latest";
-
-struct SelectTheme;
-
-impl Theme for SelectTheme {
-    fn format_select_prompt_item(
-        &self,
-        f: &mut dyn fmt::Write,
-        text: &str,
-        active: bool,
-    ) -> fmt::Result {
-        if active {
-            write!(
-                f,
-                "{} {}",
-                style(">").for_stderr().cyan().bold(),
-                style(text).for_stderr().cyan().bold()
-            )
-        } else {
-            write!(f, "  {text}")
-        }
-    }
-}
 
 pub fn run(cmd: &mut clap::Command, matches: &ArgMatches) -> anyhow::Result<()> {
     let cwd = std::env::current_dir()

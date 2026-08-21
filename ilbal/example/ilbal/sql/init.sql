@@ -1,0 +1,41 @@
+/*
+-- SEQUIN SETUP
+-- Create user with a secure password
+CREATE USER sequin_user WITH PASSWORD 'quack123';
+
+-- Grant connect permission
+GRANT CONNECT ON DATABASE app to sequin_user;
+
+-- Grant permission to create replication tables
+GRANT CREATE ON SCHEMA public TO sequin_user;
+GRANT USAGE ON SCHEMA public TO sequin_user;
+
+-- Grant select permission on tables you want to replicate
+-- grant select on table table1, table2, table3 to sequin_user;
+-- OR grant select on all tables in a schema
+GRANT SELECT ON ALL TABLES IN SCHEMA public to sequin_user;
+
+-- Grant replication permission
+ALTER USER sequin_user WITH REPLICATION;
+*/
+
+-- pgDog setup: Create publication and slot
+CREATE PUBLICATION sequin_pub FOR ALL TABLES WITH (publish_via_partition_root = true);
+SELECT pg_create_logical_replication_slot('sequin_slot', 'pgoutput');
+
+-- Create roles for web app access
+CREATE ROLE authenticator WITH LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD 'quack123';
+CREATE ROLE webuser WITH NOLOGIN;
+GRANT webuser TO authenticator;
+
+-- Create schema 'extension' and prepare it for use
+CREATE SCHEMA extensions;
+ALTER DATABASE app SET search_path = "$user", public, extensions;
+GRANT USAGE ON SCHEMA extensions TO webuser;
+
+-- Create extensions
+CREATE EXTENSION citext SCHEMA extensions;
+CREATE EXTENSION "uuid-ossp" SCHEMA extensions;
+CREATE EXTENSION pgcrypto SCHEMA extensions;
+CREATE EXTENSION pgjwt SCHEMA extensions;
+CREATE EXTENSION postgis SCHEMA extensions;
