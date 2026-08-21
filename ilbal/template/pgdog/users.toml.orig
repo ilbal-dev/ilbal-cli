@@ -1,8 +1,0 @@
-[[users]]
-<<<<<<< HEAD
-name = "pgdog"
-=======
-name = "authenticator"
->>>>>>> new-pull
-database = "${POSTGRES_DB}"
-password = "${POSTGRES_PASSWORD}"

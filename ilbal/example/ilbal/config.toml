@@ -1,7 +1,7 @@
 [project]
 name = "example"
 description = "An Example Project"
-authors = ["Nate Currit", "Joe Schmoe"]
+authors = ["Nate"]
 
 [runtime]
 runtime = "docker"
