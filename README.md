@@ -21,9 +21,9 @@ cargo install --path ilbal
 | Command | Status | Description |
 |---|---|---|
 | `ilbal init` | ✅ | Creates a new project interactively. Prompts for name, runtime (Docker/Podman), credentials. Writes `<name>/ilbal/config.toml`. |
-| `ilbal start` | 🚧 | Starts the local dev stack (postgresql, pgadmin4, pgdog) |
-| `ilbal stop` | 🚧 | Stops containers |
-| `ilbal status` | 🚧 | Shows container health |
+| `ilbal start` | ✅ | Starts the local dev stack (postgresql, pgadmin4, pgdog) |
+| `ilbal stop` | ✅ | Stops containers |
+| `ilbal status` | ✅ | Shows container health |
 | `ilbal ingest` | ✅ | Runs data ingestion via Docker |
 | `ilbal pull` | 🚧 | Pulls required images |
 | `ilbal pgbranch` | 🚧 | Database branching |

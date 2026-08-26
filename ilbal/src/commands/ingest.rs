@@ -1,3 +1,4 @@
+use crate::registries::registry;
 use crate::typedefs::BINARIES;
 use crate::typedefs::SelectTheme;
 use clap::ArgMatches;
@@ -5,8 +6,6 @@ use dialoguer::Select;
 use owo_colors::OwoColorize;
 use std::io::Write;
 use std::process::Command;
-
-const DOCKER_IMAGE: &str = "ilbal-ingest:latest";
 
 pub fn run(cmd: &mut clap::Command, matches: &ArgMatches) -> anyhow::Result<()> {
     let cwd = std::env::current_dir()
@@ -34,7 +33,7 @@ pub fn run(cmd: &mut clap::Command, matches: &ArgMatches) -> anyhow::Result<()> 
                         .arg(&volume)
                         .arg("-w")
                         .arg("/data")
-                        .arg(DOCKER_IMAGE)
+                        .arg(registry::images("ingest"))
                         .arg(binary)
                         .args(tool_args)
                         .output()?;
@@ -49,7 +48,7 @@ pub fn run(cmd: &mut clap::Command, matches: &ArgMatches) -> anyhow::Result<()> 
                         .arg(&volume)
                         .arg("-w")
                         .arg("/data")
-                        .arg(DOCKER_IMAGE)
+                        .arg(registry::images("ingest"))
                         .arg(binary)
                         .args(tool_args)
                         .status()?;
