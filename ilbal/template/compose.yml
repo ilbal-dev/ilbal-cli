@@ -40,6 +40,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: "False"
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_CONFIG_SESSION_COOKIE_NAME: "'${PROJECT_NAME}-pga4-session'"
     ports:
       - "${PGADMIN_PORT}:80"
     volumes:
@@ -84,6 +85,8 @@ services:
       - "${SEAWEEDFS_FILER_PORT}:8888"
       - "${SEAWEEDFS_WEBDAV_PORT}:7333"
       - "${SEAWEEDFS_ADMIN_PORT}:23646"
+    volumes:
+      - seaweedfs_data:/data
     networks:
       - ${PROJECT_NAME}_network
 
@@ -153,6 +156,7 @@ volumes:
   pgdata:
   pgadmin_data:
   sequin_redis_data:
+  seaweedfs_data:
 
 networks:
   ${PROJECT_NAME}_network:

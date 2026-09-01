@@ -40,6 +40,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: quack123
       PGADMIN_CONFIG_SERVER_MODE: "False"
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_CONFIG_SESSION_COOKIE_NAME: "'example-pga4-session'"
     ports:
       - "33331:80"
     volumes:
@@ -84,6 +85,8 @@ services:
       - "33336:8888"
       - "33337:7333"
       - "33338:23646"
+    volumes:
+      - seaweedfs_data:/data
     networks:
       - example_network
 
@@ -153,6 +156,7 @@ volumes:
   pgdata:
   pgadmin_data:
   sequin_redis_data:
+  seaweedfs_data:
 
 networks:
   example_network:
