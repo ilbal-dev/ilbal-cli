@@ -2,18 +2,14 @@
 name = "ilbal"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/ilbal-dev/ilbal-cli"
+authors = ["ilbal.dev"]
 
-[package.metadata.dist]
-repository = "https://github.com/ilbal/ilbal-cli"
-targets = [
-  "x86_64-apple-darwin",
-  "aarch64-apple-darwin",
-  "x86_64-unknown-linux-musl",
-  "aarch64-unknown-linux-musl",
-  "x86_64-pc-windows-msvc",
-]
-installers = ["shell", "powershell", "msi"]
-install-path = "CARGO_HOME"
+[package.metadata.wix]
+upgrade-guid = "9C0377AD-932C-4D2B-9A71-1F6A7BE49B5E"
+path-guid = "596A288D-3E56-4B20-9EAB-9A0705103766"
+license = false
+eula = false
 
 [dependencies]
 anyhow = "1.0.103"
