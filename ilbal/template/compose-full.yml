@@ -18,7 +18,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/postgresql.conf:/postgres/postgresql.conf:ro
       - ./postgres/pg_hba.conf:/postgres/pg_hba.conf:ro
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql/init-sequin.sql:/docker-entrypoint-initdb.d/init.sql
       - ../data:/data
     networks:
       - ${PROJECT_NAME}_network
@@ -61,7 +61,7 @@ services:
     hostname: ${PROJECT_NAME}-martin
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgresql://authenticator:${POSTGRES_PASSWORD}@postgresql:5432/${POSTGRES_DB}?options=-c%20role%3Dwebuser
+      - DATABASE_URL=postgresql://authenticator:${POSTGRES_PASSWORD}@pgdog:6432/${POSTGRES_DB}?options=-c%20role%3Dwebuser
     command:
       - --webui
       - enable-for-all
@@ -69,6 +69,9 @@ services:
       - "${MARTIN_PORT}:3000"
     networks:
       - ${PROJECT_NAME}_network
+    depends_on:
+      pgdog:
+        condition: service_started
 
   seaweedfs:
     image: ${IMAGE_SEAWEEDFS}
@@ -88,9 +91,72 @@ services:
     networks:
       - ${PROJECT_NAME}_network
 
+  pgdog:
+    image: ${IMAGE_PGDOG}
+    pull_policy: missing
+    container_name: ${PROJECT_NAME}-pgdog
+    hostname: ${PROJECT_NAME}-pgdog
+    restart: unless-stopped
+    ports:
+      - "${PGDOG_PORT}:6432"
+    volumes:
+      - ./pgdog/pgdog.toml:/pgdog/pgdog.toml
+      - ./pgdog/users.toml:/pgdog/users.toml
+    networks:
+      - ${PROJECT_NAME}_network
+    depends_on:
+      postgresql:
+        condition: service_healthy
+
+  sequin-redis:
+    image: ${IMAGE_REDIS}
+    pull_policy: missing # could be `always`, too
+    container_name: ${PROJECT_NAME}-redis
+    hostname: ${PROJECT_NAME}-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:6379"
+    command: ["redis-server", "--port", "6379"]
+    volumes:
+      - sequin_redis_data:/data
+    networks:
+      - ${PROJECT_NAME}_network
+
+  sequin:
+    image: ${IMAGE_SEQUIN}
+    pull_policy: missing # could be `always`, too
+    container_name: ${PROJECT_NAME}-sequin
+    hostname: ${PROJECT_NAME}-sequin
+    restart: unless-stopped
+    environment:
+      - PG_HOSTNAME=${PROJECT_NAME}-postgresql
+      - PG_DATABASE=${POSTGRES_DB}
+      - PG_PORT=5432
+      - PG_USERNAME=${POSTGRES_USER}
+      - PG_PASSWORD=${POSTGRES_PASSWORD}
+      - PG_POOL_SIZE=20
+      # Un-comment for SSL
+      # - PG_SSL=true
+      - SECRET_KEY_BASE=wDPLYus0pvD6qJhKJICO4dauYPXfO/Yl782Zjtpew5qRBDp7CZvbWtQmY0eB13If
+      - VAULT_KEY=2Sig69bIpuSm2kv0VQfDekET2qy8qUZGI8v3/h3ASiY=
+      - REDIS_URL=redis://${PROJECT_NAME}-redis:6379
+      - CONFIG_FILE_PATH=/config/sequin.yml
+    ports:
+      - "${SEQUIN_PORT}:7376"
+    volumes:
+      - ./sequin/sequin.yml:/config/sequin.yml
+    networks:
+      - ${PROJECT_NAME}_network
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      sequin-redis:
+        condition: service_started
+
 volumes:
   pgdata:
   pgadmin_data:
+  sequin_redis_data:
   seaweedfs_data:
 
 networks:

@@ -1,7 +1,3 @@
--- pgDog setup: Create publication and slot
-CREATE PUBLICATION sequin_pub FOR ALL TABLES WITH (publish_via_partition_root = true);
-SELECT pg_create_logical_replication_slot('sequin_slot', 'pgoutput');
-
 -- Create roles for web app access
 CREATE ROLE authenticator WITH LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${POSTGRES_PASSWORD}';
 CREATE ROLE webuser WITH NOLOGIN;

@@ -92,9 +92,17 @@ fn run_program() -> anyhow::Result<()> {
             .to_string(),
         )
         .subcommand(Command::new("init").about("Initialize an ilbal project"))
+        .subcommand(
+            Command::new("init-full")
+                .about("Initialize an ilbal project with the full stack (pgDog, Sequin, Redis)"),
+        )
         .subcommand(Command::new("start").about("Start the ilbal database"))
         .subcommand(Command::new("stop").about("Stop the ilbal database"))
         .subcommand(Command::new("status").about("Get the status of the ilbal project"))
+        .subcommand(
+            Command::new("status-full")
+                .about("Get the status of the ilbal project (includes pgDog, Sequin, Redis)"),
+        )
         .subcommand(ingest_cmd.clone())
         .subcommand(Command::new("reset").about("Reset the ilbal project"))
         .subcommand(
@@ -122,9 +130,11 @@ fn run_program() -> anyhow::Result<()> {
     let mut ingest_cmd = ingest_cmd;
     match match_result.subcommand_name() {
         Some("init") => commands::init::run(),
+        Some("init-full") => commands::init_full::run(),
         Some("start") => commands::start::run(),
         Some("stop") => commands::stop::run(),
         Some("status") => commands::status::run(),
+        Some("status-full") => commands::status_full::run(),
         Some("reset") => commands::reset::run(),
         Some("pgbranch") => commands::pgbranch::run(),
         Some("pgroll") => commands::pgroll::run(),

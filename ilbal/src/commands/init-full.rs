@@ -193,6 +193,9 @@ pub fn run() -> Result<()> {
             ("${IMAGE_PGADMIN}", registry::images("pgadmin4")),
             ("${IMAGE_MARTIN}", registry::images("martin")),
             ("${IMAGE_SEAWEEDFS}", registry::images("seaweedfs")),
+            ("${IMAGE_SEQUIN}", registry::images("sequin")),
+            ("${IMAGE_PGDOG}", registry::images("pgdog")),
+            ("${IMAGE_REDIS}", registry::images("redis")),
             ("${PROJECT_NAME}", &project),
             ("${POSTGRES_USER}", &pg_username),
             ("${POSTGRES_PASSWORD}", &pg_password),
@@ -273,6 +276,27 @@ pub fn run() -> Result<()> {
                     .status()?;
                 if !seaweedfs_status.success() {
                     anyhow::bail!("Failed to pull SeaweedFS image");
+                }
+
+                let sequin_status = Command::new("docker")
+                    .args(["pull", registry::images("sequin")])
+                    .status()?;
+                if !sequin_status.success() {
+                    anyhow::bail!("Failed to pull pgDog image");
+                }
+
+                let pgdog_status = Command::new("docker")
+                    .args(["pull", registry::images("pgdog")])
+                    .status()?;
+                if !pgdog_status.success() {
+                    anyhow::bail!("Failed to pull pgDog image");
+                }
+
+                let redis_status = Command::new("docker")
+                    .args(["pull", registry::images("redis")])
+                    .status()?;
+                if !redis_status.success() {
+                    anyhow::bail!("Failed to pull redis image");
                 }
             }
             RuntimeType::Podman => {

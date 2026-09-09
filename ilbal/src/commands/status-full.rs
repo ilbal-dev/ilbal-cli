@@ -53,6 +53,8 @@ pub fn run() -> anyhow::Result<()> {
     let pgadmin_icon = container_icon(&config.runtime.runtime, &config.project.name, "pgadmin");
     let martin_icon = container_icon(&config.runtime.runtime, &config.project.name, "martin");
     let seaweedfs_icon = container_icon(&config.runtime.runtime, &config.project.name, "seaweedfs");
+    let sequin_icon = container_icon(&config.runtime.runtime, &config.project.name, "sequin");
+    let pgdog_icon = container_icon(&config.runtime.runtime, &config.project.name, "pgdog");
 
     // PROJECT INFORMATION
     println!();
@@ -121,7 +123,7 @@ pub fn run() -> anyhow::Result<()> {
         url_label = style("URL").dim(),
         url = style(&config.martin.martin_url).cyan(),
         note_label = style("Note").dim(),
-        note = "Uses authenticator role connecting to PostgreSQL directly",
+        note = "Uses authenticator role via pgDog",
     );
     println!();
     println!("---------------------------------------------");
@@ -143,6 +145,36 @@ pub fn run() -> anyhow::Result<()> {
         webdav = style(&config.seaweedfs.seaweedfs_webdav_url).cyan(),
         admin_label = style("Admin UI").dim(),
         admin = style(&config.seaweedfs.seaweedfs_admin_url).cyan(),
+    );
+    println!();
+    println!("---------------------------------------------");
+    println!();
+
+    // Sequin
+    println!(
+        "  {sequin_icon} {title}\n    {url_label} {url}\n    {email_label} {email}\n    {pass_label} {pass}\n    {note_label} {note}",
+        title = style("Sequin (CDC / Event Streaming)").bold().underlined(),
+        url_label = style("URL").dim(),
+        url = style(&config.sequin.sequin_url).cyan(),
+        email_label = style("Email").dim(),
+        email = style(&config.sequin.sequin_email).bold(),
+        pass_label = style("Password").dim(),
+        pass = style(&config.sequin.sequin_password).bold(),
+        note_label = style("Note").dim(),
+        note = "Connects to PostgreSQL directly",
+    );
+    println!();
+    println!("---------------------------------------------");
+    println!();
+
+    // pgDog
+    println!(
+        "  {pgdog_icon} {title}\n    {url_label} {url}\n    {note_label} {note}",
+        title = style("pgDog (Connection Pooler)").bold().underlined(),
+        url_label = style("URL").dim(),
+        url = style(&config.pgdog.pgdog_url).cyan(),
+        note_label = style("Note").dim(),
+        note = "Routes connections to PostgreSQL",
     );
     println!();
     println!("---------------------------------------------");
