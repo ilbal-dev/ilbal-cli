@@ -10,8 +10,7 @@
       # Required for cargo-tarpaulin
       openssl
       pkg-config
-      # rustls is a pure rust option to explore instead of the above
-      # cargo-cross
+      cargo-dist
     ]
     ++ lib.optionals pkgs.stdenv.isLinux [
       pkgsCross.mingwW64.stdenv.cc
@@ -44,6 +43,8 @@
       "x86_64-pc-windows-gnu"
       "aarch64-apple-darwin"
       "x86_64-apple-darwin"
+      "x86_64-unknown-linux-musl"
+      "aarch64-unknown-linux-musl"
     ];
   };
 

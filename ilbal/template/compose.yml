@@ -19,6 +19,7 @@ services:
       - ./postgres/postgresql.conf:/postgres/postgresql.conf:ro
       - ./postgres/pg_hba.conf:/postgres/pg_hba.conf:ro
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../data:/data
     networks:
       - ${PROJECT_NAME}_network
     healthcheck:

@@ -3,6 +3,18 @@ name = "ilbal"
 version = "0.1.0"
 edition = "2024"
 
+[package.metadata.dist]
+repository = "https://github.com/ilbal/ilbal-cli"
+targets = [
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+  "x86_64-unknown-linux-musl",
+  "aarch64-unknown-linux-musl",
+  "x86_64-pc-windows-msvc",
+]
+installers = ["shell", "powershell", "msi"]
+install-path = "CARGO_HOME"
+
 [dependencies]
 anyhow = "1.0.103"
 clap = { version = "4.6.1", features = ["cargo"] }
@@ -18,3 +30,8 @@ walkdir = "2.5.0"
 include_dir = { version = "0.7.4", features = ["glob"] }
 console = "0.16.4"
 figlet-rs = "1.0.0"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
