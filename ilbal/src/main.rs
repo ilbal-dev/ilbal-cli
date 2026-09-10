@@ -92,17 +92,9 @@ fn run_program() -> anyhow::Result<()> {
             .to_string(),
         )
         .subcommand(Command::new("init").about("Initialize an ilbal project"))
-        .subcommand(
-            Command::new("init-full")
-                .about("Initialize an ilbal project with the full stack (pgDog, Sequin, Redis)"),
-        )
         .subcommand(Command::new("start").about("Start the ilbal database"))
         .subcommand(Command::new("stop").about("Stop the ilbal database"))
         .subcommand(Command::new("status").about("Get the status of the ilbal project"))
-        .subcommand(
-            Command::new("status-full")
-                .about("Get the status of the ilbal project (includes pgDog, Sequin, Redis)"),
-        )
         .subcommand(ingest_cmd.clone())
         .subcommand(Command::new("reset").about("Reset the ilbal project"))
         .subcommand(
