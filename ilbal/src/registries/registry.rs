@@ -4,7 +4,7 @@ pub fn images(key: &str) -> &'static str {
         "ingest" => "docker.io/ilbal/ilbal-ingest:latest",
         // "dev" => "ilbal-dev:0.1.0", // to contain pgbranch and pgroll
         "pgadmin4" => "docker.io/dpage/pgadmin4:latest",
-        "martin" => "ghcr.io/maplibre/martin:1.13.0",
+        "martin" => "ghcr.io/maplibre/martin:latest",
         "seaweedfs" => "docker.io/chrislusf/seaweedfs:latest",
         "sequin" => "docker.io/sequin/sequin:latest",
         "pgdog" => "ghcr.io/pgdogdev/pgdog:latest",
